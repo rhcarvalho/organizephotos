@@ -105,5 +105,6 @@ def organizedir(path, force=False, dry_run=False):
 
 
 if __name__ == '__main__':
-    path = sys.argv[1]
-    organizedir(path, dry_run=True)
+    paths = sys.argv[1:]
+    for path in paths:
+        organizedir(path, dry_run=True)
