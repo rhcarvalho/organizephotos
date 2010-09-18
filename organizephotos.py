@@ -33,10 +33,11 @@ if _using_exif:
         datetime_format = "%Y:%m:%d %H:%M:%S"
         try:
             exif_datetime = datetime.strptime(datetime_string, datetime_format)
+            offset = timedelta(hours=offset)
+            exif_datetime += offset
         except ValueError:
             exif_datetime = None
-        offset = timedelta(hours=offset)
-        return exif_datetime + offset
+        return exif_datetime
 
 
 def _get_modification_datetime(filename):
