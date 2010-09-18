@@ -6,7 +6,7 @@ Usage:
 $ python organizephotos.py /path/to/your/photos
 '''
 
-import datetime
+from datetime import datetime, timedelta
 import os
 import re
 import sys
@@ -27,24 +27,23 @@ if _using_exif:
         info = i._getexif() or dict()
         return dict([(TAGS.get(tag, tag), value) for tag, value in info.items()])
     
-    def _get_exif_date(filename):
-        '''Returns the date when the picture was taken.
-        
-        If the 'DateTime' tag is present in the EXIF info, returns
-        the date as YYYY-MM-DD, else returns None.
-        '''
+    def _get_exif_datetime(filename, offset):
         exif = _get_exif(filename)
-        date = exif.get('DateTime', '')[:10].replace(':', '-')
-        return date
+        datetime_string = exif.get('DateTime')
+        datetime_format = "%Y:%m:%d %H:%M:%S"
+        try:
+            exif_datetime = datetime.strptime(datetime_string, datetime_format)
+        except ValueError:
+            exif_datetime = None
+        offset = timedelta(hours=offset)
+        return exif_datetime + offset
 
 
-def _get_modification_date(filename):
-    '''Returns the modification time of `filename` as YYYY-MM-DD.
-    '''
-    return datetime.date.fromtimestamp(os.path.getmtime(filename)).isoformat()
+def _get_modification_datetime(filename):
+    return datetime.fromtimestamp(os.path.getmtime(filename))
 
 
-def _get_date(filename):
+def _get_date(filename, offset):
     '''Returns the modification time of `filename` as YYYY-MM-DD.
     
     If PIL is installed, and `filename` refers to a JPG file,
@@ -53,13 +52,13 @@ def _get_date(filename):
     modification time.
     '''
     if filename.upper().endswith('.JPG') and _using_exif:
-        date = _get_exif_date(filename) or _get_modification_date(filename)
+        file_datetime = _get_exif_datetime(filename, offset) or _get_modification_datetime(filename)
     else:
-        date = _get_modification_date(filename)
-    return date
+        file_datetime = _get_modification_datetime(filename)
+    return file_datetime.date().isoformat()
 
 
-def organizedir(path, force=False, dry_run=False):
+def organizedir(path, force=False, dry_run=False, offset=0):
     '''Organize files from `path` according to their dates.
     
     Set `force` to True to reorganize a directory, even when it seems to be organized.
@@ -84,7 +83,7 @@ def organizedir(path, force=False, dry_run=False):
         for dirpath, dirnames, filenames in os.walk(path):
             for name in filenames:
                 old = os.path.join(dirpath, name)
-                date = _get_date(old)
+                date = _get_date(old, offset)
                 date_dirname = "%s ()" % date
                 date_dirnames[date_dirname] = date_dirnames.get(date_dirname, 0) + 1
                 new = os.path.join(path, date_dirname, name)
