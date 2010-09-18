@@ -109,7 +109,10 @@ if __name__ == '__main__':
     force = raw_input("Reorganize dated folders? [y/N] ") == "y"
     print "If you took photos when your camera had wrong clock, you can compensate now."
     offset = raw_input("Type a value to add to the EXIF date time [0]: ")
-    offset = int(offset) if offset.isdigit() else 0
+    try:
+        offset = int(offset)
+    except ValueError:
+        offset = 0
     move = raw_input("Are you sure you want to move the files? [y/N] ") == "y"
     dry_run = not move
     print
