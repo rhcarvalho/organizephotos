@@ -92,7 +92,7 @@ def organizedir(path, force=False, dry_run=False, offset=0):
                     print "'%s' -> '%s'" % (old, new)
                     os.renames(old, new)
             for name in dirnames[:]:
-                if organized_path.match(name):
+                if organized_path.match(name) and not force:
                     print "Skipping '%s'" % name
                     dirnames.remove(name)
     print
