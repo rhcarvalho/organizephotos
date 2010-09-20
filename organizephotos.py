@@ -6,6 +6,7 @@ Usage:
 $ python organizephotos.py /path/to/your/photos
 '''
 
+from collections import defaultdict
 from datetime import datetime, timedelta
 import os
 import re
@@ -75,7 +76,7 @@ def organizedir(path, force=False, dry_run=False, offset=0):
     if dry_run:
         print "Dry run, nothing will be moved, created nor changed."
     
-    date_dirnames = {}
+    directory_counter = defaultdict(int)
     
     basedir = os.path.basename(path) or os.path.basename(os.path.dirname(path))
     if organized_path.match(basedir) and not force:
@@ -85,9 +86,9 @@ def organizedir(path, force=False, dry_run=False, offset=0):
             for name in filenames:
                 old = os.path.join(dirpath, name)
                 date = _get_date(old, offset)
-                date_dirname = "%s ()" % date
-                date_dirnames[date_dirname] = date_dirnames.get(date_dirname, 0) + 1
-                new = os.path.join(path, date_dirname, name)
+                organized_directory_name = "%s ()" % date
+                directory_counter[organized_directory_name] += 1
+                new = os.path.join(path, organized_directory_name, name)
                 if not dry_run:
                     print "'%s' -> '%s'" % (old, new)
                     os.renames(old, new)
@@ -97,9 +98,9 @@ def organizedir(path, force=False, dry_run=False, offset=0):
                     dirnames.remove(name)
     print
     print "Summary"
-    if date_dirnames:
-        for dirname in sorted(date_dirnames):
-            print "%s: %d files" % (dirname, date_dirnames[dirname])
+    if directory_counter:
+        for dirname in sorted(directory_counter):
+            print "%s: %d files" % (dirname, directory_counter[dirname])
     else:
         print "Nothing to be organized."
 
