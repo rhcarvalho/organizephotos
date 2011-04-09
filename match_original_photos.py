@@ -1,47 +1,96 @@
 # Rodolfo Carvalho - 20011/04/09
 # this should be part of http://launchpad.net/organizephotos/
 
-import os
-
-
-class Photo(object):
-    def __init__(self, path):
-        self.path = path
-        self.filename = os.path.basename(path)
-        
-    def __eq__(self, other):
-        return self.filename == other.filename
-        
-    def __hash__(self):
-        return hash(self.filename)
-        
-    def __repr__(self):
-        return '<Photo@%s>' % self.path
+from collections import defaultdict
+from os.path import basename
 
 
 def match_photos(low_resolution_paths, high_resolution_paths):
-    low_resolution_photos = set((Photo(path) for path in low_resolution_paths))
-    high_resolution_photos = set((Photo(path) for path in high_resolution_paths))
+    low_resolution_names = (basename(path) for path in low_resolution_paths)
+    high_resolution_matchs = defaultdict(list)
+    for path in high_resolution_paths:
+        high_resolution_matchs[basename(path)].append(path)
     
-    return sorted(photo.path for photo in high_resolution_photos.intersection(low_resolution_photos))
+    return [high_resolution_matchs[name] for name in low_resolution_names]
 
 
-#---------------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 
 import unittest
 from random import sample
 
 
 class TestMatchPhotos(unittest.TestCase):
-    _max = 5000
-    _common = sorted(sample(xrange(_max), 2))
-    low_res = ['/path/to/low/res/DSC%05d.jpg' % i for i in _common]
-    
-    hi_res = ['/path/to/hi/res/DSC%05d.jpg' % i for i in xrange(_max)]
-    hi_res_match = ['/path/to/hi/res/DSC%05d.jpg' % i for i in _common]
 
-    def test_match_low_high(self):
-        self.assertEqual(match_photos(self.low_res, self.hi_res), self.hi_res_match)
+    def test_match_single_correspondence(self):
+        low_res = ['/path/to/low/res/DSC00004.jpg',
+                   '/path/to/low/res/DSC00003.jpg']
+        hi_res = ['/path/to/hi/res/DSC00000.jpg',
+                  '/path/to/hi/res/DSC00001.jpg',
+                  '/path/to/hi/res/DSC00002.jpg',
+                  '/path/to/hi/res/DSC00003.jpg',
+                  '/path/to/hi/res/DSC00004.jpg',
+                  '/path/to/hi/res/DSC00005.jpg',
+                  '/path/to/hi/res/DSC00006.jpg',
+                  '/path/to/hi/res/DSC00007.jpg',
+                  '/path/to/hi/res/DSC00008.jpg',
+                  '/path/to/hi/res/DSC00009.jpg']
+        match = [['/path/to/hi/res/DSC00004.jpg'],
+                 ['/path/to/hi/res/DSC00003.jpg']]
+        
+        self.assertEqual(match_photos(low_res, hi_res), match)
+
+    def test_match_multiple_correspondence(self):
+        low_res = ['/path/to/low/res/DSC00003.jpg',
+                   '/path/to/low/res/DSC00004.jpg']
+        hi_res = ['/path/to/hi/res/DSC00000.jpg',
+                  '/path/to/hi/res/DSC00001.jpg',
+                  '/path/to/hi/res/DSC00002.jpg',
+                  '/path/to/hi/res/DSC00003.jpg',
+                  '/path/to/hi/res/DSC00004.jpg',
+                  '/path/to/hi/res/DSC00005.jpg',
+                  '/path/to/hi/res/DSC00006.jpg',
+                  '/path/to/hi/res/DSC00007.jpg',
+                  '/path/to/hi/res/DSC00008.jpg',
+                  '/path/to/hi/res/DSC00009.jpg',
+                  '/path/to/another/hi/res/DSC00004.jpg',
+                  '/path/to/another/hi/res/DSC00003.jpg']
+        match = [['/path/to/hi/res/DSC00003.jpg',
+                  '/path/to/another/hi/res/DSC00003.jpg'],
+                 ['/path/to/hi/res/DSC00004.jpg',
+                  '/path/to/another/hi/res/DSC00004.jpg']]
+        
+        self.assertEqual(match_photos(low_res, hi_res), match)
+
+    def test_match_no_correspondence(self):
+        low_res = ['/path/to/low/res/DSC00003.jpg',
+                   '/path/to/low/res/DSC00004.jpg']
+        hi_res = []
+        match = [[], []]
+        
+        self.assertEqual(match_photos(low_res, hi_res), match)
+
+    def test_match_some_correspondence(self):
+        low_res = ['/path/to/low/res/DSC00003.jpg',
+                   '/path/to/low/res/DSC00004.jpg']
+        hi_res = ['/path/to/hi/res/DSC00004.jpg',
+                  '/path/to/hi/res/DSC00005.jpg',
+                  '/path/to/hi/res/DSC00006.jpg',
+                  '/path/to/hi/res/DSC00007.jpg',
+                  '/path/to/hi/res/DSC00008.jpg',
+                  '/path/to/hi/res/DSC00009.jpg']
+        match = [[], ['/path/to/hi/res/DSC00004.jpg']]
+        
+        self.assertEqual(match_photos(low_res, hi_res), match)
+
+    def _test_big_input(self):
+        _max = 100000
+        _common = sample(xrange(_max), 200)
+        low_res = ['/path/to/low/res/DSC%05d.jpg' % i for i in _common]
+        hi_res = ['/path/to/hi/res/DSC%05d.jpg' % i for i in xrange(_max)]
+        match = [['/path/to/hi/res/DSC%05d.jpg' % i] for i in _common]
+        
+        self.assertEqual(match_photos(low_res, hi_res), match)
 
 if __name__ == '__main__':
     unittest.main()
