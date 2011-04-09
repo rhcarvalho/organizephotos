@@ -1,5 +1,4 @@
-# Rodolfo Carvalho - 20011/04/09
-# this should be part of http://launchpad.net/organizephotos/
+#!/usr/bin/env python
 
 from collections import defaultdict
 from os import listdir
@@ -14,7 +13,8 @@ def match_photos(source_paths, destination_paths):
     destination_matchs = defaultdict(list)
     for path in destination_paths:
         destination_matchs[basename(path)].append(path)
-    return (destination_matchs[name] for name in source_names)
+    return [destination_matchs[name] for name in source_names]
+
     
 def main():
     '''Basic implementation of a main function.
@@ -39,84 +39,7 @@ def main():
             # printing.
             print ', '.join(join(sys.argv[2], path) for path in match)
 
-#-------------------------------------------------------------------------------
-
-import unittest
-from random import sample
-
-
-class TestMatchPhotos(unittest.TestCase):
-
-    def test_match_single_correspondence(self):
-        low_res = ['/path/to/low/res/DSC00004.jpg',
-                   '/path/to/low/res/DSC00003.jpg']
-        hi_res = ['/path/to/hi/res/DSC00000.jpg',
-                  '/path/to/hi/res/DSC00001.jpg',
-                  '/path/to/hi/res/DSC00002.jpg',
-                  '/path/to/hi/res/DSC00003.jpg',
-                  '/path/to/hi/res/DSC00004.jpg',
-                  '/path/to/hi/res/DSC00005.jpg',
-                  '/path/to/hi/res/DSC00006.jpg',
-                  '/path/to/hi/res/DSC00007.jpg',
-                  '/path/to/hi/res/DSC00008.jpg',
-                  '/path/to/hi/res/DSC00009.jpg']
-        match = [['/path/to/hi/res/DSC00004.jpg'],
-                 ['/path/to/hi/res/DSC00003.jpg']]
-        
-        self.assertEqual(match_photos(low_res, hi_res), match)
-
-    def test_match_multiple_correspondence(self):
-        low_res = ['/path/to/low/res/DSC00003.jpg',
-                   '/path/to/low/res/DSC00004.jpg']
-        hi_res = ['/path/to/hi/res/DSC00000.jpg',
-                  '/path/to/hi/res/DSC00001.jpg',
-                  '/path/to/hi/res/DSC00002.jpg',
-                  '/path/to/hi/res/DSC00003.jpg',
-                  '/path/to/hi/res/DSC00004.jpg',
-                  '/path/to/hi/res/DSC00005.jpg',
-                  '/path/to/hi/res/DSC00006.jpg',
-                  '/path/to/hi/res/DSC00007.jpg',
-                  '/path/to/hi/res/DSC00008.jpg',
-                  '/path/to/hi/res/DSC00009.jpg',
-                  '/path/to/another/hi/res/DSC00004.jpg',
-                  '/path/to/another/hi/res/DSC00003.jpg']
-        match = [['/path/to/hi/res/DSC00003.jpg',
-                  '/path/to/another/hi/res/DSC00003.jpg'],
-                 ['/path/to/hi/res/DSC00004.jpg',
-                  '/path/to/another/hi/res/DSC00004.jpg']]
-        
-        self.assertEqual(match_photos(low_res, hi_res), match)
-
-    def test_match_no_correspondence(self):
-        low_res = ['/path/to/low/res/DSC00003.jpg',
-                   '/path/to/low/res/DSC00004.jpg']
-        hi_res = []
-        match = [[], []]
-        
-        self.assertEqual(match_photos(low_res, hi_res), match)
-
-    def test_match_some_correspondence(self):
-        low_res = ['/path/to/low/res/DSC00003.jpg',
-                   '/path/to/low/res/DSC00004.jpg']
-        hi_res = ['/path/to/hi/res/DSC00004.jpg',
-                  '/path/to/hi/res/DSC00005.jpg',
-                  '/path/to/hi/res/DSC00006.jpg',
-                  '/path/to/hi/res/DSC00007.jpg',
-                  '/path/to/hi/res/DSC00008.jpg',
-                  '/path/to/hi/res/DSC00009.jpg']
-        match = [[], ['/path/to/hi/res/DSC00004.jpg']]
-        
-        self.assertEqual(match_photos(low_res, hi_res), match)
-
-    def _test_big_input(self):
-        _max = 100000
-        _common = sample(xrange(_max), 200)
-        low_res = ['/path/to/low/res/DSC%05d.jpg' % i for i in _common]
-        hi_res = ['/path/to/hi/res/DSC%05d.jpg' % i for i in xrange(_max)]
-        match = [['/path/to/hi/res/DSC%05d.jpg' % i] for i in _common]
-        
-        self.assertEqual(match_photos(low_res, hi_res), match)
 
 if __name__ == '__main__':
-#    unittest.main()
     main()
+
