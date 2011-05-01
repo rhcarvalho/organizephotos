@@ -6,6 +6,15 @@ from os.path import basename, join
 import sys
 
 
+# TODO
+# - Recurse directory tree (os.walk?)
+# - Somehow "return" the list of original photos
+# - Treat possible duplicates (because of the same name/number in 2 different 
+#   photos). The ambiguity could be solved checking the EXIF info for the date 
+#   when the photo was taken, or simply treat in a case-by-case analysis.
+# - Have a way to copy the original files to a given location.
+
+
 def match_photos(source_paths, destination_paths):
     '''Find files in `destination_paths` with the same name as of the files
     in `source_paths`.'''
