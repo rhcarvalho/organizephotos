@@ -1,10 +1,10 @@
 #!/usr/bin/env python
-'''
-organizephotos.py - organize your photos in directories by date
+# -*- coding: utf-8 -*-
+"""organizephotos.py - organize your photos in directories by date
 
 Usage:
 $ python organizephotos.py /path/to/your/photos
-'''
+"""
 
 from collections import defaultdict
 from datetime import datetime, timedelta
@@ -22,8 +22,7 @@ except ImportError:
 
 if _using_exif:
     def _get_exif(filename):
-        '''Returns a dictionary with all the EXIF info of a given image.
-        '''
+        """Returns a dictionary with all the EXIF info of a given image."""
         i = Image.open(filename)
         info = i._getexif() or dict()
         return dict([(TAGS.get(tag, tag), value) for tag, value in info.items()])
@@ -46,13 +45,13 @@ def _get_modification_datetime(filename):
 
 
 def _get_date(filename, offset):
-    '''Returns the modification time of `filename` as YYYY-MM-DD.
+    """Returns the modification time of `filename` as YYYY-MM-DD.
     
     If PIL is installed, and `filename` refers to a JPG file,
     try to figure out when the picture was taken.
     If the EXIF info is not avaiable, return the file
     modification time.
-    '''
+    """
     if filename.upper().endswith('.JPG') and _using_exif:
         file_datetime = _get_exif_datetime(filename, offset) or _get_modification_datetime(filename)
     else:
@@ -61,11 +60,11 @@ def _get_date(filename, offset):
 
 
 def organizedir(path, force=False, dry_run=False, offset=0):
-    '''Organize files from `path` according to their dates.
+    """Organize files from `path` according to their dates.
     
     Set `force` to True to reorganize a directory, even when it seems to be organized.
     Set `dry_run` to True to avoid changes to the file system.
-    '''
+    """
     if not os.path.isdir(path):
         print "'%s' is not a directory!" % path
         return
