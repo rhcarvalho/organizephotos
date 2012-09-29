@@ -66,20 +66,20 @@ def organizedir(path, force=False, dry_run=False, offset=0):
     Set `dry_run` to True to avoid changes to the file system.
     """
     if not os.path.isdir(path):
-        print "'%s' is not a directory!" % path
+        print u"'%s' is not a directory!" % path
         return
     
-    organized_path = re.compile(r"^\d{4}-\d{2}-\d{2}")
+    organized_path = re.compile(ur"^\d{4}-\d{2}-\d{2}")
     
-    print "Organizing photos from '%s'" % path
+    print u"Organizing photos from '%s'" % path
     if dry_run:
-        print "Dry run, nothing will be moved, created nor changed."
+        print u"Dry run, nothing will be moved, created nor changed."
     
     directory_counter = defaultdict(int)
     
     basedir = os.path.basename(path) or os.path.basename(os.path.dirname(path))
     if organized_path.match(basedir) and not force:
-        print "Skipping '%s'" % basedir
+        print u"Skipping '%s'" % basedir
     else:
         for dirpath, dirnames, filenames in os.walk(path):
             for name in filenames:
@@ -89,34 +89,34 @@ def organizedir(path, force=False, dry_run=False, offset=0):
                 directory_counter[organized_directory_name] += 1
                 new = os.path.join(path, organized_directory_name, name)
                 if not dry_run:
-                    print "'%s' -> '%s'" % (old, new)
+                    print u"'%s' -> '%s'" % (old, new)
                     os.renames(old, new)
             for name in dirnames[:]:
                 if organized_path.match(name) and not force:
-                    print "Skipping '%s'" % name
+                    print (u"Skipping '%s'" % name).encode(sys.stdin.encoding, 'replace')
                     dirnames.remove(name)
     print
-    print "Summary"
+    print u"Summary"
     if directory_counter:
         for dirname in sorted(directory_counter):
-            print "%s: %d files" % (dirname, directory_counter[dirname])
+            print u"%s: %d files" % (dirname, directory_counter[dirname])
     else:
-        print "Nothing to be organized."
+        print u"Nothing to be organized."
 
 
 if __name__ == '__main__':
-    print "OrganizePhotos"
-    force = raw_input("Reorganize dated folders? [y/N] ") == "y"
-    print "If you took photos when your camera had wrong clock, you can compensate now."
-    offset = raw_input("Type a value to add to the EXIF date time [0]: ")
+    print u"OrganizePhotos"
+    force = raw_input(u"Reorganize dated folders? [y/N] ") == "y"
+    print u"If you took photos when your camera had wrong clock, you can compensate now."
+    offset = raw_input(u"Type a value to add to the EXIF date time [0]: ")
     try:
         offset = int(offset)
     except ValueError:
         offset = 0
-    move = raw_input("Are you sure you want to move the files? [y/N] ") == "y"
+    move = raw_input(u"Are you sure you want to move the files? [y/N] ") == "y"
     dry_run = not move
     print
     
     paths = sys.argv[1:]
     for path in paths:
-        organizedir(path, force, dry_run, offset)
+        organizedir(unicode(path), force, dry_run, offset)
